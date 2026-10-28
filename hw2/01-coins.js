@@ -2,8 +2,14 @@
 
 // Add your function here
 const calculateChange = function calculateChange(amount) {
+  if (typeof amount !== 'number') {
+    return 'Error: the input is not a number';
+  }
   if (amount > 100) {
     return 'Error: the number is too large';
+  }
+  if (amount < 0) {
+    return 'Error: the number is negative';
   }
   if (amount === 0) {
     return 'No change';
@@ -94,3 +100,11 @@ console.log(calculateChange(1.0));
 // $1.00 ==> 1 dollar --- Had a trailing comma with how I was constructing the string
 console.log(calculateChange(0.0));
 // $0.00 ==> No change --- edge case, didn't want to output an empty string
+console.log(calculateChange('abc'));
+// 'abc' ==> Error: the input is not a number
+console.log(calculateChange(-0.5));
+// -0.5 ==> Error: the number is negative
+console.log(calculateChange(100));
+// $100 ==> 100 dollars
+console.log(calculateChange(100.01));
+// $100.01 ==> Error: the number is too large

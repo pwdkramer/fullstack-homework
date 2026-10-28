@@ -1,7 +1,7 @@
 {
   "singleQuote": true,
   "quoteProps": "as-needed",
-  "arrowParens": "avoid",
+  "arrowParens": "always",
   "tabWidth": 2,
   "useTabs": false,
   "printWidth": 100,
