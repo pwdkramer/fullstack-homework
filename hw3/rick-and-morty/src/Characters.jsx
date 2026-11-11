@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { fetchJson } from './api.js';
 
 export default function Characters() {
   const [characters, setCharacters] = useState([]);
@@ -6,31 +7,35 @@ export default function Characters() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    async function loadCharacters() {
+    const controller = new AbortController();
+
+    const loadCharacters = async function loadCharacters() {
       try {
         const ids = Array.from(
           { length: 100 },
-          (_, index) => index + 1
+          (_, index) => index + 1,
         );
 
-        const response = await fetch(
-          `https://rickandmortyapi.com/api/character/${ids.join(',')}`
+        const data = await fetchJson(
+          `https://rickandmortyapi.com/api/character/${ids.join(',')}`,
+          controller.signal,
         );
-
-        if (!response.ok) {
-          throw new Error('Could not load the characters.');
+        if (!controller.signal.aborted) {
+          setCharacters(data);
         }
-
-        const data = await response.json();
-        setCharacters(data);
       } catch (err) {
-        setError(err.message);
+        if (!controller.signal.aborted) {
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
     loadCharacters();
+    return () => controller.abort();
   }, []);
 
   if (loading) {
@@ -46,12 +51,18 @@ export default function Characters() {
       <h2>Characters ({characters.length})</h2>
 
       <div className="character-grid">
-        {characters.map((character) => (
-          <article key={character.id}>
-            <img src={character.image} alt={character.name} />
-            <h3>{character.name}</h3>
-            <p>Species: {character.species}</p>
-            <p>Status: {character.status}</p>
+        {characters.map(({ id, image, name, species, status }) => (
+          <article key={id}>
+            <img
+              src={image}
+              alt={name}
+              loading="lazy"
+              width="300"
+              height="300"
+            />
+            <h3>{name}</h3>
+            <p>Species: {species}</p>
+            <p>Status: {status}</p>
           </article>
         ))}
       </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { fetchAllPages } from './api.js';
 
 export default function Locations() {
   const [locations, setLocations] = useState([]);
@@ -8,25 +9,11 @@ export default function Locations() {
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadLocations() {
-      let url = 'https://rickandmortyapi.com/api/location';
+    const loadLocations = async function loadLocations() {
+      const url = 'https://rickandmortyapi.com/api/location';
 
       try {
-        const allLocations = [];
-
-        while (url) {
-          const response = await fetch(url, {
-            signal: controller.signal,
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-
-          const data = await response.json();
-          allLocations.push(...data.results);
-          url = data.info.next;
-        }
+        const allLocations = await fetchAllPages(url, controller.signal);
 
         setLocations(allLocations);
       } catch (err) {
@@ -38,7 +25,7 @@ export default function Locations() {
           setLoading(false);
         }
       }
-    }
+    };
 
     loadLocations();
     return () => controller.abort();

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { fetchAllPages } from './api.js';
 
 export default function Species() {
   const [characters, setCharacters] = useState([]);
@@ -8,26 +9,13 @@ export default function Species() {
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadCharacters() {
-      let url = 'https://rickandmortyapi.com/api/character';
+    const loadCharacters = async function loadCharacters() {
+      const url = 'https://rickandmortyapi.com/api/character';
       setLoading(true);
       setError('');
 
       try {
-        const allCharacters = [];
-
-        while (url) {
-          const response = await fetch(url, { signal: controller.signal });
-
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          const data = await response.json();
-
-          allCharacters.push(...data.results);
-          url = data.info.next;
-        }
+        const allCharacters = await fetchAllPages(url, controller.signal);
 
         setCharacters(allCharacters);
       } catch (err) {
@@ -40,7 +28,7 @@ export default function Species() {
           setLoading(false);
         }
       }
-    }
+    };
 
     loadCharacters();
     return () => controller.abort();
@@ -79,8 +67,8 @@ export default function Species() {
             </h3>
 
             <ul>
-              {members.map((character) => (
-                <li key={character.id}>{character.name}</li>
+              {members.map(({ id, name }) => (
+                <li key={id}>{name}</li>
               ))}
             </ul>
           </article>
